@@ -1,0 +1,89 @@
+.form-item-wrapper {
+    width: 100%;
+    padding: 0 1rem;
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin: 1rem 0;
+}
+.form-item-content {
+    padding: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+.form-title {
+    margin: 0.5rem 0;
+}
+.form-item-header {
+    display: flex;
+    position: relative;
+}
+.form-item-header-icon {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+}
+.icon-button {
+    margin-left: 0.5rem;
+    font-size: 1rem;
+    opacity: 1;
+    cursor: pointer;
+    transition: opacity 0.1s ease-in-out;
+}
+.icon-button:hover {
+    opacity: 0.7;
+}
+.required::after {
+    display: inline-block;
+    margin: 0 4px;
+    color: #ff0700;
+    font-size: 14px;
+    font-family: SimSun, sans-serif;
+    line-height: 1;
+    content: '*';
+}
+
+.form-item-editing-header {
+    display: flex;
+    width: 100%;
+    margin: 1rem 0;
+    justify-content: space-between;
+}
+
+.form-item-editing-option {
+    display: flex;
+    width: 100%;
+    justify-content: space-around;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.form-item-editing-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 1rem;
+    padding: 0.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+.form-item-editing-mandatory {
+    max-width: 2rem;
+}
+.form-item-editing-footer > * {
+    margin: 0 0.5rem;
+}
+.form-item-option {
+    display: flex;
+}
+.vertical-devider {
+    border-left: 2px solid #393939;
+    min-height: 18px;
+    height: 80%;
+    margin: 0 16px;
+    width: 0;
+}
+
+.form-item-option-radio, .form-item-option-checkbox {
+    max-width: 2rem;
+    margin: 0;
+    align-self: center;
+}

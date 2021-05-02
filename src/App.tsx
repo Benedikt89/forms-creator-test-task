@@ -1,26 +1,21 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import store from "./redux/store";
+import Main from "./Main";
+import {HashRouter as Router} from "react-router-dom";
+import {Provider} from "react-redux";
 
-function App() {
+require('./index.less');
+
+const App: React.FC = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router basename={''}>
+      <Provider store={store}>
+        <Main/>
+      </Provider>
+    </Router>
   );
-}
+};
+
 
 export default App;

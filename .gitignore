@@ -1,9 +1,9 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
 /node_modules
 /.pnp
 .pnp.js
+.idea
 
 # testing
 /coverage
@@ -13,7 +13,7 @@
 
 # misc
 .DS_Store
-.env.local
+.env.private
 .env.development.local
 .env.test.local
 .env.production.local
