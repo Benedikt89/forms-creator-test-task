@@ -1,5 +1,5 @@
 import * as React from "react";
-import {useCallback, useEffect, useRef, useState} from "react";
+import {useCallback, useEffect, useState} from "react";
 import {CheckOutlined, DeleteOutlined, EllipsisOutlined, PlusOutlined} from '@ant-design/icons';
 import './forms.css';
 import {Button, Dropdown, Menu, Select, Switch, Tooltip} from "antd";
@@ -8,29 +8,32 @@ import {useDispatch, useSelector} from "react-redux";
 import {AppStateType} from "../../redux/store";
 import {deleteField, setEditingField, updateField} from "../../redux/forms/actions";
 import {v4 as uuid} from 'uuid';
-import {getLocale} from "../../constants/languageType";
+import {getLocale, LanguageType} from "../../constants/languageType";
 import {getRule, ruleTypes, ruleUniqTypes} from "../../redux/forms/reducer";
 
 const { Option } = Select;
 
 interface IProps {
   formId: string
+  language: LanguageType
   field: FieldItem
 }
 
-const fieldTypesOptions:{value: FieldTypes, title: string}[] = [
+const fieldTextOptions:{value: FieldTypes, title: string}[] = [
   {value: 'text', title: 'field'},
   {value: 'textarea', title: 'textarea'},
-
+];
+const fieldSelectOptions:{value: FieldTypes, title: string}[] = [
   {value: 'radio', title: 'radio'},
   {value: 'checkbox', title: 'checkbox'},
   {value: 'select', title: 'select'},
-
+];
+const fieldTimeOptions:{value: FieldTypes, title: string}[] = [
   {value: 'range', title: 'range'},
   {value: 'date', title: 'date'},
   {value: 'time', title: 'time'},
-  {value: 'password', title: 'password'},
 ];
+
 
 const FieldItemEditing: React.FC<IProps> = ({formId, field}) => {
   const {language, editingFieldId} = useSelector((state: AppStateType) =>
@@ -40,7 +43,6 @@ const FieldItemEditing: React.FC<IProps> = ({formId, field}) => {
     }));
   const dispatch = useDispatch();
   const [fieldCopy, setFieldCopy] = useState<FieldItem>(field);
-  const wrapperRef = useRef<HTMLDivElement | null>(null);
 
   const updateFieldCopy = useCallback((key, value) => setFieldCopy((prev: FieldItem) =>
     ({...prev, [key]: value})), [fieldCopy]);
@@ -98,7 +100,7 @@ const FieldItemEditing: React.FC<IProps> = ({formId, field}) => {
   }, [fieldCopy]);
 
   return (
-    <div className="form-item-wrapper" ref={wrapperRef}>
+    <div className="form-item-wrapper">
       <div className="form-item-editing-header">
         <input
           type="text"
@@ -108,13 +110,22 @@ const FieldItemEditing: React.FC<IProps> = ({formId, field}) => {
         />
         <Select defaultValue={fieldCopy.inputType} style={{width: 120}}
                 onChange={(val: FieldTypes) => updateFieldCopy('inputType', val)}>
-          {fieldTypesOptions.map(obj => (<Option key={obj.value} value={obj.value}>{obj.title}</Option>))}
+          {fieldTextOptions.map(obj => (<Option key={obj.value} value={obj.value}>{obj.title}</Option>))}
+          {fieldSelectOptions.map((obj, i) =>
+            (<Option
+              key={obj.value}
+              style={i === 0 ? {marginTop: '1rem'} : i === fieldSelectOptions.length - 1 ? {marginBottom: '1rem'} : {}}
+              value={obj.value}>
+              {obj.title}
+            </Option>))}
+          {fieldTimeOptions.map(obj => (<Option key={obj.value} value={obj.value}>{obj.title}</Option>))}
         </Select>
       </div>
 
       {fieldCopy.displayDescription && <textarea id="story" name="story"
                                                  rows={2} cols={1}
                                                  className="ant-input"
+                                                 style={{marginBottom: '1rem'}}
                                                  onChange={event => updateFieldCopy('description', event.target.value)}
                                                  value={fieldCopy.description}
       />}
@@ -146,7 +157,7 @@ const FieldItemEditing: React.FC<IProps> = ({formId, field}) => {
                 <DeleteOutlined className="icon-button" onClick={() => changeFieldOptions(option.value)}/>
               </div>
           ))}
-          <Button type="text" onClick={() => changeFieldOptions()}><PlusOutlined /> ADD</Button>
+          <Button type="text" onClick={() => changeFieldOptions()}><PlusOutlined />Option</Button>
         </div> : null}
       </div>
 
@@ -181,18 +192,19 @@ const FieldItemEditing: React.FC<IProps> = ({formId, field}) => {
             </div>
           )
         })}
-        <Dropdown trigger={['click']} overlay={() => <Menu onClick={({ key }: {key: RulesTypes} & any) => changeRules(key)}>
+        {field.inputType === 'text' || field.inputType === 'textarea'
+        && <Dropdown trigger={['click']} overlay={() => <Menu onClick={({ key }: {key: RulesTypes} & any) => changeRules(key)}>
           {[...ruleTypes, ...ruleUniqTypes]
             .filter(type => !fieldCopy.rules.map(r => r.type).includes(type))
             .map((type) => <Menu.Item key={type} >{type}</Menu.Item>)}
         </Menu>}>
-          <Button type="text"><PlusOutlined /> ADD Rule</Button>
-        </Dropdown>
+          <Button type="text"><PlusOutlined />Rule</Button>
+        </Dropdown>}
       </div>
 
       <div className="form-item-editing-footer">
         <Tooltip title={getLocale(language, 'delete')}>
-          <DeleteOutlined onClick={() => dispatch(deleteField())}/>
+          <DeleteOutlined onClick={() => dispatch(deleteField(formId))}/>
         </Tooltip>
         <Tooltip title={getLocale(language, 'displayDescription')}>
           <EllipsisOutlined onClick={() => updateFieldCopy('displayDescription', true)}/>

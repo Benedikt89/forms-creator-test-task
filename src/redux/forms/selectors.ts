@@ -1,6 +1,5 @@
 import {AppStateType} from "../store";
-import {FormItemType, I_User} from "../../types/form-types";
-import {isUser} from "../../types/typeHelpers";
+import {FormItemType} from "../../types/form-types";
 
 export const selectForm = (state: AppStateType, id: string): FormItemType | null => {
   if (state.forms.forms[id]) {
@@ -9,5 +8,20 @@ export const selectForm = (state: AppStateType, id: string): FormItemType | null
   return null;
 };
 
-export const selectUser = (state: AppStateType, userId: string): I_User | null =>
-  isUser(state.forms.user[userId]);
+export const selectIsFormOwner = (state: AppStateType, id: string): boolean | null => {
+  if (state.forms.forms[id]) {
+    if (state.app.userData) {
+      return state.forms.forms[id].creatorId === state.app.userData.id;
+    }
+  }
+  return null;
+};
+
+export const selectUserFormValue = (state: AppStateType, formId: string, fieldId: string):string => {
+  if (state.forms.forms[formId] && state.forms.forms[formId].fields[fieldId]) {
+    if (state.app.userData) {
+      return state.forms.forms[formId].fields[fieldId].values[state.app.userData.id] || '';
+    }
+  }
+  return '';
+};

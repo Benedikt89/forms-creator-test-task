@@ -53,7 +53,7 @@ interface I_setEditingField {
   type: typeof formsActionTypes.SET_EDITING_FIELD, fieldId: string
 }
 interface I_deleteField {
-  type: typeof formsActionTypes.DELETE_FIELD
+  type: typeof formsActionTypes.DELETE_FIELD, formId: string
 }
 interface I_deleteForm {
   type: typeof formsActionTypes.DELETE_FORM, formId: string
@@ -82,8 +82,8 @@ export const addNewFormField = (formId: string, index: number): I_addNewFormFiel
 export const setEditingField = (fieldId: string): I_setEditingField => ({
   type: formsActionTypes.SET_EDITING_FIELD, fieldId
 });
-export const deleteField = (): I_deleteField => ({
-  type: formsActionTypes.DELETE_FIELD
+export const deleteField = (formId: string): I_deleteField => ({
+  type: formsActionTypes.DELETE_FIELD, formId
 });
 export const updateField = (formId: string, fieldId: string, field: Partial<FieldItem>): I_updateField => ({
   type: formsActionTypes.UPDATE_FIELD, field, fieldId, formId
@@ -94,7 +94,7 @@ export const updateField = (formId: string, fieldId: string, field: Partial<Fiel
  ==================== */
 export const addNewForm = () =>
   fetchHandler(
-    "addNewForm",
+    "fetchFormData",
     async (dispatch: ThunkDispatch<{}, {}, AppActionsType>, getState: GetStateType) => {
       const userData = selectUserData(getState());
       if (userData && userData.id) {
@@ -108,7 +108,7 @@ export const addNewForm = () =>
 
 export const fetchFormsData = () =>
   fetchHandler(
-    "fetchAllData",
+    "fetchFormData",
     async (dispatch: ThunkDispatch<{}, {}, AppActionsType>) => {
       //array of data to fetch
       const datas: DataType[] = ["user", "forms"];
@@ -128,12 +128,11 @@ export const fetchFormsData = () =>
   });
 
 
-export const onFormUpdate = (formId: string) =>
+export const onFormUpdate = (form: FormItemType) =>
   fetchHandler(
-    `form${formId}`,
+    `form__${form.id}`,
     async (dispatch: ThunkDispatch<{}, {}, AppActionsType>, getState: GetStateType) => {
       let res;
-      const form = selectForm(getState(), formId);
       //user data to set who was updating last
       let userData = selectUserData(getState());
       if (userData && userData.id && form) {
@@ -147,7 +146,7 @@ export const onFormUpdate = (formId: string) =>
     });
 
 export const deleteForm = (formId: string) => fetchHandler(
-  `form${formId}`,
+  `form__${formId}`,
   async (dispatch: ThunkDispatch<{}, {}, AppActionsType>, getState: GetStateType) => {
     let res;
     const form = selectForm(getState(), formId);

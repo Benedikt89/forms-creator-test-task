@@ -2,22 +2,27 @@ import * as React from "react";
 import {useCallback, useEffect, useState} from "react";
 import {EditOutlined} from '@ant-design/icons';
 import './forms.css';
-import {Select, Typography} from "antd";
+import {DatePicker, Select, Typography} from "antd";
 import {FieldItem, withOptionsTypes} from "../../types/form-types";
 import {getRule} from "../../redux/forms/reducer";
+import {LanguageType} from "../../constants/languageType";
+import moment from "moment";
 
 const {Text} = Typography;
 
 interface IProps {
   formId: string
   field: FieldItem
+  initValue: string
+  isOwner: boolean | null | undefined
+  language: LanguageType
   setEditingFieldCallback?: () => void
   onChange: (value: string) => void
 }
 
-const FieldItemPreview: React.FC<IProps> = React.memo(({field, onChange, setEditingFieldCallback}) => {
-  const [value, setValue] = useState<string>(field.value ? field.value : field.defaultValue ? field.defaultValue : '');
-  const [optsValue, setOptsValue] = useState<string[]>(field.value ? field.value.split('__') : field.defaultValue ? field.defaultValue.split('__') : []);
+const FieldItemPreview: React.FC<IProps> = React.memo(({field, onChange, initValue, isOwner, setEditingFieldCallback}) => {
+  const [value, setValue] = useState<string>(initValue);
+  const [optsValue, setOptsValue] = useState<string[]>(initValue ? initValue.split('__') : field.defaultValue ? field.defaultValue.split('__') : []);
   const [touched, setTouched] = useState<boolean>(false);
   const [active, setActive] = useState<boolean>(false);
   const [validationError, setValidationError] = useState<string | undefined | null>('');
@@ -28,7 +33,7 @@ const FieldItemPreview: React.FC<IProps> = React.memo(({field, onChange, setEdit
     if (field.mandatory) {
       rules.unshift(getRule('mandatory'))
     }
-    for (let i = 0; i < rules.length; i ++) {
+    for (let i = 0; i < rules.length; i++) {
       if (!err) {
         err = rules[i].callBack(val);
         if (err) {
@@ -40,10 +45,10 @@ const FieldItemPreview: React.FC<IProps> = React.memo(({field, onChange, setEdit
   };
 
   useEffect(() => {
-    if (value !== field.value && !touched) {
+    if (value !== initValue && !touched) {
       setTouched(true)
     }
-    if (value && value === field.value && touched) {
+    if (value && value === initValue && touched) {
       setTouched(false)
     }
   }, [value]);
@@ -79,7 +84,7 @@ const FieldItemPreview: React.FC<IProps> = React.memo(({field, onChange, setEdit
       setTouched(true);
       setActive(true);
     },
-    onChange:(event: any) => onChangeCallback(event.target.value),
+    onChange: (event: any) => onChangeCallback(event.target.value),
     type: field.inputType,
     name: field.id
   };
@@ -90,7 +95,7 @@ const FieldItemPreview: React.FC<IProps> = React.memo(({field, onChange, setEdit
         <h3 className={`form-title ${field.mandatory ? 'required' : ''}`}>
           {field.title}
         </h3>
-        {setEditingFieldCallback &&
+        {isOwner && setEditingFieldCallback &&
         <EditOutlined className="icon-button form-item-header-icon" style={{color: '#177ddc'}}
                       onClick={setEditingFieldCallback}/>}
       </div>
@@ -139,12 +144,18 @@ const FieldItemPreview: React.FC<IProps> = React.memo(({field, onChange, setEdit
                     max={field.maxRange}
                   />
                 </>
-                : <div>
-                  <input
-                    {...defaultProps}
-                    className="ant-input"
-                  />
-                </div>
+                : field.inputType === 'date'
+                  ? <DatePicker
+                      onBlur={() => setActive(false)}
+                      value={moment(value).isValid() ? moment(value) : moment()}
+                      onChange={(val) => val && onChangeCallback(val.format())}
+                    />
+                  : <div>
+                    <input
+                      {...defaultProps}
+                      className="ant-input"
+                    />
+                  </div>
         }
       </div>
     </div>

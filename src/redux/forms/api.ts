@@ -19,10 +19,9 @@ export const formsAPI = {
     const snapshot = await  db.collection("forms").get();
     snapshot.forEach((doc) => {
       let id = doc.id;
-      let ticket = doc.data() as FormItemType;
-      res.push({...ticket, id, lastUpdated: moment(ticket.lastUpdated.toDate())});
+      let item = doc.data() as FormItemType;
+      res.push({...item, id, lastUpdated: moment(item.lastUpdated.toDate())});
     });
-    console.log(res);
     return res;
   },
   getUsers: async (): Promise<never | I_User[]> => {
@@ -48,7 +47,8 @@ export const formsAPI = {
     }
   },
   deleteItem: async (formId: string): Promise<never | boolean> => {
-    await db.collection("tickets").doc(formId).delete();
+    const res = await db.collection("forms").doc(formId).delete();
+    console.log(res);
     return true;
   },
 };

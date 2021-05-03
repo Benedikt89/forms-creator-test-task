@@ -5,13 +5,13 @@ import {
   FieldItem,
   FieldTypes,
   FormItemType,
-  I_dataState, I_User,
-  OptionType,
+  I_dataState,
+  I_User,
   RuleItem,
   RulesTypes
 } from "../../types/form-types";
 import {formsActionTypes} from "./actions";
-import { v4 as uuid } from 'uuid';
+import {v4 as uuid} from 'uuid';
 import {isForm, isUser} from "../../types/typeHelpers";
 
 export const newFormId = '_NEW_FORM';
@@ -81,7 +81,7 @@ export const getRule = (type: RulesTypes, ruleVal: number = 5) => {
 
 const initialDefaultField = {
   defaultValue: '',
-  value: '',
+  values: {},
   title: 'Question',
   description: 'description',
   displayDescription: false,
@@ -194,6 +194,18 @@ const formsReducer = (state: I_dataState = initialState, action: AppActionsType)
         editingFieldId: action.fieldId
       }
     }
+    case formsActionTypes.UPDATE_ITEM_SUCCESS: {
+      if (!state.forms[action.data.id]) {
+        return state;
+      }
+      return {
+        ...state,
+        forms: {
+          ...state.forms,
+          [action.data.id]: {...state.forms[action.data.id], ...action.data}
+        }
+      }
+    }
     case formsActionTypes.UPDATE_FIELD: {
       let editingForm = state.forms[action.formId];
       if (editingForm && editingForm.fields[action.fieldId]) {
@@ -207,13 +219,13 @@ const formsReducer = (state: I_dataState = initialState, action: AppActionsType)
       return state;
     }
     case formsActionTypes.DELETE_FIELD: {
-      if (state.editingFormId && state.editingFieldId && state.forms[state.editingFormId]) {
-        let newForm = {...state.forms[state.editingFormId]};
+      if (state.editingFormId && state.editingFieldId && state.forms[action.formId]) {
+        let newForm = {...state.forms[action.formId]};
         delete newForm.fields[state.editingFieldId];
         newForm.fieldsIds = [...newForm.fieldsIds].filter(id => id !== state.editingFieldId);
         return {
           ...state,
-          forms: {...state.forms, [state.editingFormId]: newForm},
+          forms: {...state.forms, [action.formId]: newForm},
           editingFieldId: ''
         }
       }

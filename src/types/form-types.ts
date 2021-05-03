@@ -41,7 +41,9 @@ export type RuleItem = {
 
 export type FieldItem = {
   id: string,
-  value: string
+  values: {
+    [key: string]: string
+  },
   inputType: FieldTypes,
   title: string,
   defaultValue: string,
