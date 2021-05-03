@@ -4,10 +4,9 @@ import {connect} from "react-redux";
 import {selectErrorByKey, selectFetchingByKey, selectUserData} from "./redux/app/selectors";
 import {AppStateType} from "./redux/store";
 import Header from "./components/Header/Header";
-import {fetchAllData} from "./redux/data/actions";
 import LoginForm from "./views/login/LogInForm";
 import UserRegisterForm from "./views/register/RegisterForm";
-import ProtectedRoute from "./components/common/ProtectedRoute";
+import PrivateRoute from "./components/common/ProtectedRoute";
 import {I_UserData} from "./types/app-types";
 import {setLanguage, setUserData} from "./redux/app/actions";
 import {LanguageType} from "./constants/languageType";
@@ -23,7 +22,6 @@ interface I_connectedProps {
 }
 
 interface I_dispatchedProps {
-  fetchAllData: () => void
   setUserData: (data: I_UserData | null) => void
   setLanguage: (val: LanguageType) => void
 }
@@ -42,10 +40,6 @@ class Main extends Component<I_MainProps, I_MainState> {
     }
   }
 
-  componentDidMount() {
-    //this.props.fetchAllData();
-  }
-
   render() {
     const {setUserData, userData, language, setLanguage} = this.props;
     return (
@@ -58,19 +52,17 @@ class Main extends Component<I_MainProps, I_MainState> {
           <div className={"content-wrapper"}>
             <Switch>
               <Route exact path="/"
-                     render={() => <Redirect to={"/tickets"}/>}/>
+                     render={() => <Redirect to={"/forms/empty"}/>}/>
               <Route exact path="/login"
                      component={() => <LoginForm />}/>
               <Route exact path="/register"
                      component={() => <UserRegisterForm />}/>
-              <Route exact path="/forms"
-                     component={() => <FormsPage />}/>
-              <ProtectedRoute
-                path="/profile"
-                component={() => (
-                  <UserRegisterForm user={userData} />
-                )}
-              />
+              <PrivateRoute exact path="/forms/:formid">
+                <FormsPage />
+              </PrivateRoute>
+              <PrivateRoute path="/profile">
+                <UserRegisterForm user={userData} />
+              </PrivateRoute>
 
               <Route path="*" render={() => <div>Error 404</div>}/>
             </Switch>
@@ -91,7 +83,7 @@ const mapStateToProps = (state: AppStateType): I_connectedProps => {
 };
 
 let ComposedComponent = connect(
-  mapStateToProps, {fetchAllData, setUserData, setLanguage}
+  mapStateToProps, {setUserData, setLanguage}
 )(Main);
 
 export default ComposedComponent;

@@ -29,7 +29,7 @@ class AppHeader extends React.Component<I_Props> {
           <img src={logo} className="logo" alt={'logo'}/>
         </Link>
 
-        <Link to='/forms' key="2">
+        <Link to='/forms/empty' key="2">
           <Button type="text" style={{color: '#fff'}}>
             {getLocale(language, 'header_forms')}
           </Button>

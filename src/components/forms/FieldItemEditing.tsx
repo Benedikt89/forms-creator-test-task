@@ -108,7 +108,7 @@ const FieldItemEditing: React.FC<IProps> = ({formId, field}) => {
         />
         <Select defaultValue={fieldCopy.inputType} style={{width: 120}}
                 onChange={(val: FieldTypes) => updateFieldCopy('inputType', val)}>
-          {fieldTypesOptions.map(obj => (<Option value={obj.value}>{obj.title}</Option>))}
+          {fieldTypesOptions.map(obj => (<Option key={obj.value} value={obj.value}>{obj.title}</Option>))}
         </Select>
       </div>
 

@@ -1,16 +1,18 @@
 import {AppActionsType} from "../store";
 import moment from "moment";
 import {
+  DataPayloadType,
   FieldItem,
   FieldTypes,
   FormItemType,
-  I_formsState,
+  I_dataState, I_User,
   OptionType,
   RuleItem,
   RulesTypes
 } from "../../types/form-types";
 import {formsActionTypes} from "./actions";
 import { v4 as uuid } from 'uuid';
+import {isForm, isUser} from "../../types/typeHelpers";
 
 export const newFormId = '_NEW_FORM';
 
@@ -96,7 +98,7 @@ export const getNewField = (inputType: FieldTypes = 'text'): FieldItem => ({
   inputType,
 });
 
-const newForm: FormItemType = {
+export const newFormTemplate: FormItemType = {
   id: newFormId,
   creatorId: '',
   title: 'Person',
@@ -127,16 +129,33 @@ const newForm: FormItemType = {
   fieldsIds: ['name', 'email', 'gender']
 };
 
-const initialState:I_formsState = {
-  forms: {
-    'person' : {...newForm, id: 'person'}
-  },
+const initialState:I_dataState = {
+  forms: {},
+  user: {},
   editingFormId: 'person',
   editingFieldId: ''
 };
 
-const formsReducer = (state: I_formsState = initialState, action: AppActionsType): I_formsState => {
+const formsReducer = (state: I_dataState = initialState, action: AppActionsType): I_dataState => {
   switch (action.type) {
+    case formsActionTypes.SET_FETCHED_DATA: {
+      let newState = {...state};
+      if (action.dataType === 'user') {
+        newState.user = {};
+      }
+      if (action.dataType === 'forms') {
+        newState.forms = {};
+      }
+      action.data.forEach((d: DataPayloadType) => {
+        if (isUser(d)) {
+          newState['user'][d.id] = d as I_User;
+        }
+        if (isForm(d)) {
+          newState['forms'][d.id] = d as FormItemType;
+        }
+      });
+      return newState;
+    }
     case formsActionTypes.ADD_NEW_FORM_FIELD: {
       let form = state.forms[action.formId];
       if (!form) {
@@ -161,9 +180,9 @@ const formsReducer = (state: I_formsState = initialState, action: AppActionsType
         ...state,
         forms: {
           ...state.forms,
-          [newFormId]: newForm
+          [action.form.id]: action.form
         },
-        editingFormId: newFormId
+        editingFormId: action.form.id
       }
     }
     case formsActionTypes.SET_EDITING_FIELD: {
@@ -195,6 +214,18 @@ const formsReducer = (state: I_formsState = initialState, action: AppActionsType
         return {
           ...state,
           forms: {...state.forms, [state.editingFormId]: newForm},
+          editingFieldId: ''
+        }
+      }
+      return state;
+    }
+    case formsActionTypes.DELETE_FORM: {
+      if (state.editingFormId && state.forms[action.formId]) {
+        let newForms = {...state.forms};
+        delete newForms[action.formId];
+        return {
+          ...state,
+          forms: newForms,
           editingFieldId: ''
         }
       }

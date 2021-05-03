@@ -1,7 +1,7 @@
-///
-
-
 import {Moment} from "moment";
+
+export type DataType = 'forms' | 'user'
+export type DataPayloadType = FormItemType | I_User
 
 export type FieldTypes = 'text' | 'textarea' | 'select' | 'radio' | 'checkbox' |
   'date' | 'time' | 'password' | 'range'
@@ -9,6 +9,23 @@ export type FieldTypes = 'text' | 'textarea' | 'select' | 'radio' | 'checkbox' |
 export type RulesTypes = 'min' | 'max' | 'phone' | 'email' | 'number' | 'mandatory'
 
 export const withOptionsTypes: FieldTypes[] = ['radio', 'checkbox'];
+
+export type I_dataState = {
+  readonly forms: {
+    [key: string]: FormItemType
+  }
+  readonly user: {
+    [key: string]: I_User
+  }
+  readonly editingFormId: string
+  readonly editingFieldId: string
+}
+
+export type I_User = {
+  id: string,
+  name: string,
+  avatar: string
+}
 
 export type OptionType = {
   title: string,
@@ -50,10 +67,5 @@ export type FormItemType = {
   }
 }
 
-export type I_formsState = {
-  readonly forms: {
-    [key: string]: FormItemType
-  }
-  readonly editingFormId: string
-  readonly editingFieldId: string
-}
+
+
