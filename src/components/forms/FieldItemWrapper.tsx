@@ -1,5 +1,5 @@
 import * as React from "react";
-import {useCallback} from "react";
+import {useCallback, useRef} from "react";
 import './forms.css';
 import FieldItemEditing from "./FieldItemEditing";
 import {useDispatch, useSelector} from "react-redux";
@@ -7,7 +7,6 @@ import {setEditingField, updateField} from "../../redux/forms/actions";
 import {AppStateType} from "../../redux/store";
 import {FieldItem} from "../../types/form-types";
 import FieldItemPreview from "./FieldItem";
-import {useRef} from "react";
 import {DropTargetMonitor, useDrag, useDrop} from "react-dnd";
 import {XYCoord} from "dnd-core";
 
@@ -28,10 +27,11 @@ interface DragItem {
 }
 
 const FieldItemWrapper: React.FC<IProps> = ({formId, field, index, loading, isOwner, userId, moveCard}) => {
-  const {language, editingFieldId} = useSelector((state: AppStateType) =>
+  const {language, editingFieldId, requiredValidate} = useSelector((state: AppStateType) =>
     ({
       language: state.app.language,
-      editingFieldId: state.forms.editingFieldId
+      editingFieldId: state.forms.editingFieldId,
+      requiredValidate: state.forms.requiredValidate
     }));
   const dispatch = useDispatch();
   const ref = useRef<HTMLDivElement | null>(null);
@@ -100,9 +100,12 @@ const FieldItemWrapper: React.FC<IProps> = ({formId, field, index, loading, isOw
     <div ref={ref} style={{opacity: opacity}} data-handler-id={handlerId}>
       {editingFieldId === field.id
         ? <FieldItemEditing formId={formId} field={field} language={language}/>
-        : <FieldItemPreview formId={formId} field={field} initValue={initValue} language={language} isOwner={isOwner}
-                            onChange={val => dispatch(updateField(formId, field.id, {...field, values: {...field.values, [userId]: val}}))}
-                            setEditingFieldCallback={setEditingFieldCallback}
+        : <FieldItemPreview
+          formId={formId} field={field} initValue={initValue} language={language} isOwner={isOwner}
+          onChange={(formId: string, fieldId: string, field: Partial<FieldItem>) => dispatch(updateField(formId, fieldId, field))}
+          requiredValidate={requiredValidate}
+          userId={userId}
+          setEditingFieldCallback={setEditingFieldCallback}
         />}
     </div>
   )

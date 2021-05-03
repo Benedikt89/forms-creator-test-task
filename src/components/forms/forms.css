@@ -60,7 +60,9 @@
     align-items: center;
     margin-bottom: 1rem;
 }
-
+.form-item-editing-option.custom {
+    background-color: rgba(51, 20, 20, 0.9);
+}
 .form-item-editing-footer {
     display: flex;
     justify-content: flex-end;

@@ -3,8 +3,8 @@ import {useCallback, useEffect, useState} from "react";
 import {EditOutlined} from '@ant-design/icons';
 import './forms.css';
 import {DatePicker, Select, Typography} from "antd";
-import {FieldItem, withOptionsTypes} from "../../types/form-types";
-import {getRule} from "../../redux/forms/reducer";
+import {FieldItem, FormStatusTypes, withOptionsTypes} from "../../types/form-types";
+import {customOptId, getRule} from "../../redux/forms/reducer";
 import {LanguageType} from "../../constants/languageType";
 import moment from "moment";
 
@@ -15,18 +15,25 @@ interface IProps {
   field: FieldItem
   initValue: string
   isOwner: boolean | null | undefined
+  userId: string
+  requiredValidate: FormStatusTypes
   language: LanguageType
   setEditingFieldCallback?: () => void
-  onChange: (value: string) => void
+  onChange: (formId: string, fieldId: string, field: Partial<FieldItem>) => void
 }
 
-const FieldItemPreview: React.FC<IProps> = React.memo(({field, onChange, initValue, isOwner, setEditingFieldCallback}) => {
+const FieldItemPreview: React.FC<IProps> = React.memo(
+  ({formId, field, onChange, initValue, isOwner, setEditingFieldCallback, requiredValidate, userId}) => {
   const [value, setValue] = useState<string>(initValue);
+  const [customOptionValue, setCustomOptionValue] = useState<string>(field.customRadio && field.customRadio[userId] ? field.customRadio[userId] : '');
   const [optsValue, setOptsValue] = useState<string[]>(initValue ? initValue.split('__') : field.defaultValue ? field.defaultValue.split('__') : []);
   const [touched, setTouched] = useState<boolean>(false);
   const [active, setActive] = useState<boolean>(false);
   const [validationError, setValidationError] = useState<string | undefined | null>('');
 
+  const customOptionSelected = optsValue.includes(customOptId);
+
+  /* ==================== validate value with all the rules ==================== */
   const validate = (val: string) => {
     let err: string | undefined | null = null;
     const rules = [...field.rules];
@@ -45,6 +52,13 @@ const FieldItemPreview: React.FC<IProps> = React.memo(({field, onChange, initVal
   };
 
   useEffect(() => {
+    /* ==================== validate on reducer variable change ==================== */
+    if (requiredValidate === 'validating') {
+      validate(value);
+    }
+  }, [requiredValidate]);
+
+  useEffect(() => {
     if (value !== initValue && !touched) {
       setTouched(true)
     }
@@ -54,14 +68,22 @@ const FieldItemPreview: React.FC<IProps> = React.memo(({field, onChange, initVal
   }, [value]);
 
   useEffect(() => {
+    /* ==================== validate on blur, if no errors, update reducer ==================== */
     if (touched && !active) {
       validate(value);
-      onChange(value);
+      let newObject = {...field, values: {...field.values, [userId]: value}};
+      if (customOptionSelected) {
+        newObject.customRadio = newObject.customRadio
+          ? {...newObject.customRadio, [userId]: customOptionValue}
+          : {[userId]: customOptionValue}
+      }
+      onChange(formId, field.id, newObject);
     }
   }, [active]);
 
   const onChangeCallback = useCallback((val: string) => {
     let finalVal = val;
+    /* ==================== storing selected options id's in string ==================== */
     if (field.inputType === 'checkbox' && value.length) {
       let arr = [...optsValue];
       if (arr.includes(val)) {
@@ -76,8 +98,9 @@ const FieldItemPreview: React.FC<IProps> = React.memo(({field, onChange, initVal
       validate(finalVal);
     }
     setValue(finalVal);
-  }, [validationError, active, optsValue]);
+  }, [field, value, validationError, active, optsValue]);
 
+    /* ==================== default input props ==================== */
   const defaultProps = {
     onBlur: () => setActive(false),
     onFocus: () => {
@@ -153,10 +176,25 @@ const FieldItemPreview: React.FC<IProps> = React.memo(({field, onChange, initVal
                   : <div>
                     <input
                       {...defaultProps}
+                      value={value}
                       className="ant-input"
                     />
                   </div>
         }
+        {customOptionSelected && <>
+        <label htmlFor={field.id}>Custom</label>
+        <br/>
+          <input
+              onBlur={() => setActive(false)}
+              onFocus={() => {
+                setTouched(true);
+                setActive(true);
+              }}
+              onChange={(event: any) => setCustomOptionValue(event.target.value)}
+              value={customOptionValue}
+              className="ant-input"
+          />
+        </>}
       </div>
     </div>
   )

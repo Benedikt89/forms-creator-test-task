@@ -9,7 +9,7 @@ import {AppStateType} from "../../redux/store";
 import {deleteField, setEditingField, updateField} from "../../redux/forms/actions";
 import {v4 as uuid} from 'uuid';
 import {getLocale, LanguageType} from "../../constants/languageType";
-import {getRule, ruleTypes, ruleUniqTypes} from "../../redux/forms/reducer";
+import {customOptId, getRule, ruleTypes, ruleUniqTypes} from "../../redux/forms/reducer";
 
 const { Option } = Select;
 
@@ -34,12 +34,10 @@ const fieldTimeOptions:{value: FieldTypes, title: string}[] = [
   {value: 'time', title: 'time'},
 ];
 
-
 const FieldItemEditing: React.FC<IProps> = ({formId, field}) => {
-  const {language, editingFieldId} = useSelector((state: AppStateType) =>
+  const {language} = useSelector((state: AppStateType) =>
     ({
       language: state.app.language,
-      editingFieldId: state.forms.editingFieldId
     }));
   const dispatch = useDispatch();
   const [fieldCopy, setFieldCopy] = useState<FieldItem>(field);
@@ -63,12 +61,18 @@ const FieldItemEditing: React.FC<IProps> = ({formId, field}) => {
     updateFieldCopy('options', newOptions);
   };
 
+  const addCustomOption = () => {
+      let newOptions = [...fieldCopy.options, {value: customOptId, title: 'Custom Option'}];
+      updateFieldCopy('options', newOptions);
+      updateFieldCopy('customRadio', {});
+    };
+
   const updateRule = (index: number, value: number) => {
     let newRules = [...fieldCopy.rules];
     newRules[index] = {...newRules[index], ...getRule(newRules[index].type, value)};
     updateFieldCopy('rules', newRules);
   };
-
+  /* ==================== select only one rule as email/phone/number, if exists, replace ==================== */
   const changeRules = (type: RulesTypes, remove?: boolean) => {
     let newRules = [...fieldCopy.rules];
     let toDeleteRuleIndex = ruleUniqTypes.includes(type) ? -1 : -2;
@@ -134,7 +138,7 @@ const FieldItemEditing: React.FC<IProps> = ({formId, field}) => {
         {fieldCopy.inputType === 'select' || withOptionsTypes.includes(fieldCopy.inputType)
         ? <div>
           {fieldCopy.options.map((option, i) => (
-              <div key={option.value} className="form-item-editing-option">
+              <div key={option.value} className={`form-item-editing-option ${option.value === customOptId && 'custom'}`}>
                 {fieldCopy.inputType !== 'select' ? <input
                   type={fieldCopy.inputType}
                   className={`form-item-option-${fieldCopy.inputType}`}
@@ -157,7 +161,15 @@ const FieldItemEditing: React.FC<IProps> = ({formId, field}) => {
                 <DeleteOutlined className="icon-button" onClick={() => changeFieldOptions(option.value)}/>
               </div>
           ))}
-          <Button type="text" onClick={() => changeFieldOptions()}><PlusOutlined />Option</Button>
+            <div className="row space-around">
+              <Button type="text" onClick={() => changeFieldOptions()}>
+                <PlusOutlined />{getLocale(language, 'option')}
+              </Button>
+              <Button type="text" onClick={() => addCustomOption()}
+                disabled={fieldCopy.options.filter(o => o.value === customOptId).length >= 1} >
+                <PlusOutlined />{getLocale(language, 'custom')}
+              </Button>
+            </div>
         </div> : null}
       </div>
 
@@ -172,7 +184,7 @@ const FieldItemEditing: React.FC<IProps> = ({formId, field}) => {
           <input
               type="number"
               className="ant-input"
-              onChange={event => updateFieldCopy('minRange', +event.target.value)}
+              onChange={event => updateFieldCopy('maxRange', +event.target.value)}
               value={fieldCopy.maxRange}
           />
         </div>

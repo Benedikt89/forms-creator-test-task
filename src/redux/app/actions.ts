@@ -4,6 +4,7 @@ import {LanguageType} from "../../constants/languageType";
 import {fetchHandler} from "../fetchHandler";
 import {I_LoginData, I_UserData} from "../../types/app-types";
 import {appAPI} from "./appAPI";
+import {_setFetchedData} from "../forms/actions";
 
 export const appActionTypes: {
   SET_IS_FETCHING: 'app/SET_IS_FETCHING'
@@ -47,8 +48,6 @@ export const _setFetching = (key: string, status: boolean): I_setFetching =>
 export const _setError = (key: string, message: string | null): I_setError =>
   ({type: appActionTypes.SET_ERROR, key, message});
 
-export const setUserData = (data: I_UserData | null): I_setUserData =>
-  ({type: appActionTypes.SET_USER_DATA, data});
 
 export const setLanguage = (key: LanguageType): I_setLanguage =>
   ({type: appActionTypes.SET_LANGUAGE, key});
@@ -57,6 +56,15 @@ export const setLanguage = (key: LanguageType): I_setLanguage =>
 /* ====================
   thunk actions
  ==================== */
+export const setUserData = (data: I_UserData | null) => async (dispatch: ThunkDispatch<{}, {}, AppActionsType>) => {
+  if (!data) {
+    // Clear reducers on log out
+    dispatch(_setFetchedData([], 'user'));
+    dispatch(_setFetchedData([], 'forms'));
+  }
+  dispatch({type: appActionTypes.SET_USER_DATA, data});
+};
+
 
 export const logInThunk = (data: I_LoginData) => fetchHandler(
   'logInThunk',

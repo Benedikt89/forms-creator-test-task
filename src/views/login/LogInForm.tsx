@@ -17,7 +17,6 @@ const LoginForm = () => {
   const dispatch = useDispatch();
   const onFinish = (values: any) => {
     dispatch(logInThunk({name: values.name, password: values.password}));
-    console.log('Received values of form: ', values);
   };
 
   return userData && userData.id ? <Redirect to={'/'}/> : (

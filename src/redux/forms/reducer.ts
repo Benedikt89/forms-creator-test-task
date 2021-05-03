@@ -19,6 +19,8 @@ export const newFormId = '_NEW_FORM';
 export const ruleTypes: RulesTypes[] = ['min', 'max'];
 export const ruleUniqTypes: RulesTypes[] = ['phone', 'email', 'number'];
 
+export const customOptId = '<==CUSTOM=OPTION==>';
+
 export const getRule = (type: RulesTypes, ruleVal: number = 5) => {
   const response: RuleItem = {type, apply: [], ruleVal, callBack: (value: string | boolean | number) => !value ? 'Field is required!' : undefined};
   switch (type) {
@@ -98,46 +100,53 @@ export const getNewField = (inputType: FieldTypes = 'text'): FieldItem => ({
   inputType,
 });
 
-export const newFormTemplate: FormItemType = {
-  id: newFormId,
-  creatorId: '',
-  title: 'Person',
-  description: '',
-  lastUpdated: moment(),
-  confirmed: false,
-  fields: {
-    'name': {
-      ...initialDefaultField,
-      id: 'name',
-      title: 'name',
-      inputType: 'text',
+export const newFormTemplate = (): FormItemType => {
+  const fieldsIds = [uuid(), uuid(), uuid()];
+  return {
+    id: newFormId,
+    creatorId: '',
+    title: 'Person',
+    description: '',
+    lastUpdated: moment(),
+    confirmed: false,
+    fields: {
+      [fieldsIds[0]]: {
+        ...initialDefaultField,
+        id: fieldsIds[0],
+        title: 'name',
+        inputType: 'text',
+      },
+      [fieldsIds[1]]: {
+        ...initialDefaultField,
+        id: fieldsIds[1],
+        inputType: 'text',
+        title: 'email',
+      },
+      [fieldsIds[2]]: {
+        ...initialDefaultField,
+        id: fieldsIds[2],
+        title: 'gender',
+        inputType: 'radio',
+        options: [{value: uuid(), title: 'Male'}, {value: uuid(), title: 'Female'}]
+      }
     },
-    'email': {
-      ...initialDefaultField,
-      id: 'email',
-      inputType: 'text',
-      title: 'email',
-    },
-    'gender': {
-      ...initialDefaultField,
-      id: 'gender',
-      title: 'gender',
-      inputType: 'radio',
-      options: [{value: uuid(), title: 'Male'}, {value: uuid(), title: 'Female'}]
-    }
-  },
-  fieldsIds: ['name', 'email', 'gender']
+    fieldsIds
+  }
 };
 
 const initialState:I_dataState = {
   forms: {},
   user: {},
   editingFormId: 'person',
-  editingFieldId: ''
+  editingFieldId: '',
+  requiredValidate: ''
 };
 
 const formsReducer = (state: I_dataState = initialState, action: AppActionsType): I_dataState => {
   switch (action.type) {
+    /* ====================
+      setting fetched data as normalised state
+     ==================== */
     case formsActionTypes.SET_FETCHED_DATA: {
       let newState = {...state};
       if (action.dataType === 'user') {
@@ -172,7 +181,8 @@ const formsReducer = (state: I_dataState = initialState, action: AppActionsType)
         forms: {
           ...state.forms,
           [form.id]: form
-        }
+        },
+        editingFieldId: newField.id
       }
     }
     case formsActionTypes.ADD_NEW_FORM: {
@@ -239,6 +249,18 @@ const formsReducer = (state: I_dataState = initialState, action: AppActionsType)
           ...state,
           forms: newForms,
           editingFieldId: ''
+        }
+      }
+      return state;
+    }
+    /* ====================
+      variable that initiates validate in components, to display errors in each of them
+     ==================== */
+    case formsActionTypes.SET_REQUIRED_VALIDATE: {
+      if (state.requiredValidate !== action.value) {
+        return {
+          ...state,
+          requiredValidate: action.value
         }
       }
       return state;

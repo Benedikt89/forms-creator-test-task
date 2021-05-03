@@ -7,6 +7,7 @@ export type FieldTypes = 'text' | 'textarea' | 'select' | 'radio' | 'checkbox' |
   'date' | 'time' | 'password' | 'range'
 
 export type RulesTypes = 'min' | 'max' | 'phone' | 'email' | 'number' | 'mandatory'
+export type FormStatusTypes = '' | 'validating' | 'success' | 'error';
 
 export const withOptionsTypes: FieldTypes[] = ['radio', 'checkbox'];
 
@@ -19,6 +20,7 @@ export type I_dataState = {
   }
   readonly editingFormId: string
   readonly editingFieldId: string
+  readonly requiredValidate: FormStatusTypes
 }
 
 export type I_User = {
@@ -42,6 +44,9 @@ export type RuleItem = {
 export type FieldItem = {
   id: string,
   values: {
+    [key: string]: string
+  },
+  customRadio?: {
     [key: string]: string
   },
   inputType: FieldTypes,

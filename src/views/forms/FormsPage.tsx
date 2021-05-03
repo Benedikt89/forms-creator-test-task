@@ -6,13 +6,21 @@ import {AppStateType} from "../../redux/store";
 import {selectForm, selectIsFormOwner} from "../../redux/forms/selectors";
 import {PlusOutlined} from '@ant-design/icons';
 import FormHeader from "../../components/forms/FormHeader";
-import {addNewForm, addNewFormField, deleteForm, fetchFormsData, onFormUpdate,} from "../../redux/forms/actions";
+import {
+  addNewForm,
+  addNewFormField,
+  deleteForm,
+  fetchFormsData,
+  onFormUpdate,
+  setRequiredValidate,
+} from "../../redux/forms/actions";
 import FieldItemWrapper from "../../components/forms/FieldItemWrapper";
 import {Button, Spin} from "antd";
 import {useHistory, useParams} from "react-router";
-import {selectFetchingByKey, selectUserData} from "../../redux/app/selectors";
+import {selectErrorByKey, selectFetchingByKey, selectUserData} from "../../redux/app/selectors";
 import {HTML5Backend} from "react-dnd-html5-backend";
 import {DndProvider} from "react-dnd";
+import {getRule} from "../../redux/forms/reducer";
 
 const FormsPage: React.FC = () => {
   const history = useHistory();
@@ -51,6 +59,37 @@ const FormsPage: React.FC = () => {
     },
     [idsArray],
   );
+
+  const submitForm = useCallback(() => {
+    if (!form) {
+      return;
+    }
+    if (!isOwner) {
+      dispatch(setRequiredValidate('success'));
+      let err: null | string | undefined = null;
+      form.fieldsIds.forEach(fieldId => {
+        let field = form.fields[fieldId];
+        const rules = [...field.rules];
+        if (field.mandatory) {
+          rules.unshift(getRule('mandatory'))
+        }
+        for (let i = 0; i < rules.length; i++) {
+          let val = userData && field.values[userData.id] || '';
+          err = rules[i].callBack(val);
+          if (err) {
+            i = rules.length
+          }
+        }
+      });
+      if (err) {
+        ///change var to display Errors
+        dispatch(setRequiredValidate('validating'));
+        return;
+      }
+    }
+    dispatch(setRequiredValidate(''));
+    dispatch(onFormUpdate({...form, fieldsIds: idsArray}));
+  }, [form]);
 
   return (
     <div className="forms-page-wrapper">
@@ -93,7 +132,7 @@ const FormsPage: React.FC = () => {
               <PlusOutlined /> {getLocale(language, 'field')}
             </Button>}
             <Button loading={formLoading} type="primary"
-                    onClick={() => form && dispatch(onFormUpdate({...form, fieldsIds: idsArray}))}>
+                    onClick={submitForm}>
               {getLocale(language, 'save')}
             </Button>
           </div>

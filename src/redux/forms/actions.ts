@@ -2,7 +2,7 @@ import {ThunkDispatch} from "redux-thunk";
 import {AppActionsType, GetStateType} from "../store";
 import {formsAPI} from "./api";
 import {fetchHandler} from "../fetchHandler";
-import {DataPayloadType, DataType, FieldItem, FormItemType} from "../../types/form-types";
+import {DataPayloadType, DataType, FieldItem, FormItemType, FormStatusTypes} from "../../types/form-types";
 import {selectUserData} from "../app/selectors";
 import {newFormTemplate} from "./reducer";
 import {selectForm} from "./selectors";
@@ -17,6 +17,7 @@ export const formsActionTypes: {
   UPDATE_FORM: "forms/UPDATE_FORM",
   DELETE_FIELD: "forms/DELETE_FIELD",
   DELETE_FORM: "forms/DELETE_FORM",
+  SET_REQUIRED_VALIDATE: "forms/SET_REQUIRED_VALIDATE",
 } = {
   SET_FETCHED_DATA: "forms/SET_FETCHED_DATA",
   UPDATE_ITEM_SUCCESS: "forms/UPDATE_ITEM_SUCCESS",
@@ -27,10 +28,11 @@ export const formsActionTypes: {
   UPDATE_FORM: "forms/UPDATE_FORM",
   DELETE_FIELD: "forms/DELETE_FIELD",
   DELETE_FORM: "forms/DELETE_FORM",
+  SET_REQUIRED_VALIDATE: "forms/SET_REQUIRED_VALIDATE",
 };
 
 export type I_formsActions = I_setFetchedData | I_updateItemSuccess | I_addNewForm | I_addNewFormField |
-  I_setEditingField | I_deleteField | I_updateField | I_deleteForm
+  I_setEditingField | I_deleteField | I_updateField | I_deleteForm | I_setRequiredValidate
 
 //interfaces
 interface I_setFetchedData {
@@ -61,6 +63,9 @@ interface I_deleteForm {
 interface I_updateField {
   type: typeof formsActionTypes.UPDATE_FIELD, fieldId: string, formId: string, field: Partial<FieldItem>
 }
+interface I_setRequiredValidate {
+  type: typeof formsActionTypes.SET_REQUIRED_VALIDATE, value: FormStatusTypes
+}
 
 //Internal ACTIONS CREATORS
 
@@ -75,6 +80,9 @@ export const _setFetchedData = (data: DataPayloadType[], dataType: DataType): I_
 
 export const _addNewForm = (form: FormItemType): I_addNewForm => ({
   type: formsActionTypes.ADD_NEW_FORM, form
+});
+export const setRequiredValidate = (value: FormStatusTypes): I_setRequiredValidate => ({
+  type: formsActionTypes.SET_REQUIRED_VALIDATE, value
 });
 export const addNewFormField = (formId: string, index: number): I_addNewFormField => ({
   type: formsActionTypes.ADD_NEW_FORM_FIELD, formId, index
@@ -98,7 +106,7 @@ export const addNewForm = () =>
     async (dispatch: ThunkDispatch<{}, {}, AppActionsType>, getState: GetStateType) => {
       const userData = selectUserData(getState());
       if (userData && userData.id) {
-        const res = await formsAPI.addItem({...newFormTemplate, creatorId: userData.id});
+        const res = await formsAPI.addItem({...newFormTemplate(), creatorId: userData.id});
         if (res) {
           dispatch(_addNewForm(res));
           return true;
