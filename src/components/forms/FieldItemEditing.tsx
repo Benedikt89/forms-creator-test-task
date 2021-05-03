@@ -2,7 +2,7 @@ import * as React from "react";
 import {useCallback, useEffect, useRef, useState} from "react";
 import {CheckOutlined, DeleteOutlined, EllipsisOutlined, PlusOutlined} from '@ant-design/icons';
 import './forms.css';
-import {Button, Dropdown, Menu, Select, Switch, Tooltip, Typography} from "antd";
+import {Button, Dropdown, Menu, Select, Switch, Tooltip} from "antd";
 import {FieldItem, FieldTypes, RulesTypes, withOptionsTypes} from "../../types/form-types";
 import {useDispatch, useSelector} from "react-redux";
 import {AppStateType} from "../../redux/store";
@@ -40,25 +40,10 @@ const FieldItemEditing: React.FC<IProps> = ({formId, field}) => {
     }));
   const dispatch = useDispatch();
   const [fieldCopy, setFieldCopy] = useState<FieldItem>(field);
-
   const wrapperRef = useRef<HTMLDivElement | null>(null);
-
-  const handleOuterClick = useCallback(() => {
-    dispatch(setEditingField(''));
-  }, []);
-
 
   const updateFieldCopy = useCallback((key, value) => setFieldCopy((prev: FieldItem) =>
     ({...prev, [key]: value})), [fieldCopy]);
-
-
-  useEffect(() => {
-
-    return () => {
-      dispatch(updateField(field.id, fieldCopy));
-    }
-  }, [fieldCopy]);
-  //useOnClickOutside(wrapperRef, handleOuterClick);
 
   const updateFieldOption = (index: number, value: string) => {
     let newOptions = [...fieldCopy.options];
@@ -75,6 +60,7 @@ const FieldItemEditing: React.FC<IProps> = ({formId, field}) => {
     }
     updateFieldCopy('options', newOptions);
   };
+
   const updateRule = (index: number, value: number) => {
     let newRules = [...fieldCopy.rules];
     newRules[index] = {...newRules[index], ...getRule(newRules[index].type, value)};
@@ -104,6 +90,13 @@ const FieldItemEditing: React.FC<IProps> = ({formId, field}) => {
     updateFieldCopy('rules', newRules);
   };
 
+  useEffect(() => {
+
+    return () => {
+      dispatch(updateField(formId, field.id, fieldCopy));
+    }
+  }, [fieldCopy]);
+
   return (
     <div className="form-item-wrapper" ref={wrapperRef}>
       <div className="form-item-editing-header">
@@ -118,12 +111,14 @@ const FieldItemEditing: React.FC<IProps> = ({formId, field}) => {
           {fieldTypesOptions.map(obj => (<Option value={obj.value}>{obj.title}</Option>))}
         </Select>
       </div>
+
       {fieldCopy.displayDescription && <textarea id="story" name="story"
                                                  rows={2} cols={1}
                                                  className="ant-input"
                                                  onChange={event => updateFieldCopy('description', event.target.value)}
                                                  value={fieldCopy.description}
       />}
+
       <div>
         {fieldCopy.inputType === 'select' || withOptionsTypes.includes(fieldCopy.inputType)
         ? <div>
@@ -155,6 +150,22 @@ const FieldItemEditing: React.FC<IProps> = ({formId, field}) => {
         </div> : null}
       </div>
 
+      {fieldCopy.inputType === 'range' && <div>
+        <div className="form-item-editing-option">
+          <input
+              type="number"
+              className="ant-input"
+              onChange={event => updateFieldCopy('minRange', +event.target.value)}
+              value={fieldCopy.minRange}
+          />
+          <input
+              type="number"
+              className="ant-input"
+              onChange={event => updateFieldCopy('minRange', +event.target.value)}
+              value={fieldCopy.maxRange}
+          />
+        </div>
+      </div>}
       <div>
         {fieldCopy.rules.map((rule, i) => {
           return (
@@ -178,7 +189,6 @@ const FieldItemEditing: React.FC<IProps> = ({formId, field}) => {
           <Button type="text"><PlusOutlined /> ADD Rule</Button>
         </Dropdown>
       </div>
-
 
       <div className="form-item-editing-footer">
         <Tooltip title={getLocale(language, 'delete')}>

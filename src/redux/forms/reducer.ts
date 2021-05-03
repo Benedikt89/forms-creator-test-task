@@ -18,24 +18,24 @@ export const ruleTypes: RulesTypes[] = ['min', 'max'];
 export const ruleUniqTypes: RulesTypes[] = ['phone', 'email', 'number'];
 
 export const getRule = (type: RulesTypes, ruleVal: number = 5) => {
-  const response: RuleItem = {type, apply: [], ruleVal, callBack: (value: string | boolean | number) => !value ? 'Error' : undefined};
+  const response: RuleItem = {type, apply: [], ruleVal, callBack: (value: string | boolean | number) => !value ? 'Field is required!' : undefined};
   switch (type) {
     case "email": {
       response.callBack = (value: string | boolean | number) => {
-        if (typeof value !== 'string') return 'Error';
+        if (typeof value !== 'string') return 'Error should be string!';
         const regExp = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         if (!regExp.test(String(value).toLowerCase())) {
-          return 'Error'
+          return 'Should be valid e-mail!'
         }
       };
       break
     }
     case "phone": {
       response.callBack = (value: string | boolean | number) => {
-        if (typeof value !== 'string') return 'Error';
+        if (typeof value !== 'string') return 'Error should be string!';
         const regExp = /(?:(?:\+?1\s*(?:[.-]\s*)?)?(?:(\s*([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9]‌​)\s*)|([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9]))\s*(?:[.-]\s*)?)([2-9]1[02-9]‌​|[2-9][02-9]1|[2-9][02-9]{2})\s*(?:[.-]\s*)?([0-9]{4})\s*(?:\s*(?:#|x\.?|ext\.?|extension)\s*(\d+)\s*)?$/i;
         if (!regExp.test(String(value).toLowerCase())) {
-          return 'Error'
+          return 'Should be valid phone!'
         }
       };
       break
@@ -48,7 +48,7 @@ export const getRule = (type: RulesTypes, ruleVal: number = 5) => {
         if (typeof value === 'number' && value >= ruleVal) {
           return undefined;
         }
-        return 'Error'
+        return 'Should be more then ' + ruleVal + '!'
       };
       break;
     }
@@ -60,16 +60,16 @@ export const getRule = (type: RulesTypes, ruleVal: number = 5) => {
         if (typeof value === 'number' && value < ruleVal) {
           return undefined;
         }
-        return 'Error'
+        return 'Should be less then ' + ruleVal + '!'
       };
       break;
     }
     case "number": {
       response.callBack = (value: string | boolean | number) => {
-        if (typeof value === 'number') {
+        if (typeof +value === 'number' && !Number.isNaN(+value)) {
           return undefined;
         }
-        return 'Error'
+        return 'Should be number!'
       };
       break;
     }
@@ -77,56 +77,50 @@ export const getRule = (type: RulesTypes, ruleVal: number = 5) => {
   return response;
 };
 
-export const getNewField = (inputType: FieldTypes = 'text'): FieldItem => ({
-  id: uuid(),
-  inputType,
+const initialDefaultField = {
   defaultValue: '',
+  value: '',
   title: 'Question',
   description: 'description',
   displayDescription: false,
   mandatory: false,
+  minRange: 0,
+  maxRange: 100,
   rules: [],
   options: [{value: uuid(), title: 'Option'}]
+};
+
+export const getNewField = (inputType: FieldTypes = 'text'): FieldItem => ({
+  ...initialDefaultField,
+  id: uuid(),
+  inputType,
 });
 
 const newForm: FormItemType = {
   id: newFormId,
   creatorId: '',
-  title: 'New Form',
+  title: 'Person',
   description: '',
   lastUpdated: moment(),
+  confirmed: false,
   fields: {
     'name': {
+      ...initialDefaultField,
       id: 'name',
-      inputType: 'text',
-      defaultValue: '',
       title: 'name',
-      description: 'description',
-      displayDescription: false,
-      mandatory: false,
-      rules: [],
-      options: [{value: uuid(), title: 'Option'}]
+      inputType: 'text',
     },
     'email': {
+      ...initialDefaultField,
       id: 'email',
       inputType: 'text',
-      defaultValue: '',
       title: 'email',
-      description: 'description',
-      displayDescription: false,
-      mandatory: false,
-      rules: [],
-      options: [{value: uuid(), title: 'Option'}]
     },
     'gender': {
+      ...initialDefaultField,
       id: 'gender',
-      inputType: 'radio',
-      defaultValue: '',
       title: 'gender',
-      description: 'description',
-      displayDescription: false,
-      mandatory: false,
-      rules: [],
+      inputType: 'radio',
       options: [{value: uuid(), title: 'Male'}, {value: uuid(), title: 'Female'}]
     }
   },
@@ -182,13 +176,13 @@ const formsReducer = (state: I_formsState = initialState, action: AppActionsType
       }
     }
     case formsActionTypes.UPDATE_FIELD: {
-      let editingForm = state.forms[state.editingFormId];
+      let editingForm = state.forms[action.formId];
       if (editingForm && editingForm.fields[action.fieldId]) {
         let newForm = {...editingForm};
         newForm.fields[action.fieldId] = {...newForm.fields[action.fieldId], ...action.field};
         return {
           ...state,
-          forms: {...state.forms, [state.editingFormId]: newForm},
+          forms: {...state.forms, [action.formId]: newForm},
         }
       }
       return state;

@@ -52,7 +52,7 @@ interface I_deleteField {
   type: typeof formsActionTypes.DELETE_FIELD
 }
 interface I_updateField {
-  type: typeof formsActionTypes.UPDATE_FIELD, fieldId: string, field: Partial<FieldItem>
+  type: typeof formsActionTypes.UPDATE_FIELD, fieldId: string, formId: string, field: Partial<FieldItem>
 }
 
 //Internal ACTIONS CREATORS
@@ -75,8 +75,8 @@ export const setEditingField = (fieldId: string): I_setEditingField => ({
 export const deleteField = (): I_deleteField => ({
   type: formsActionTypes.DELETE_FIELD
 });
-export const updateField = (fieldId: string, field: Partial<FieldItem>): I_updateField => ({
-  type: formsActionTypes.UPDATE_FIELD, field, fieldId
+export const updateField = (formId: string, fieldId: string, field: Partial<FieldItem>): I_updateField => ({
+  type: formsActionTypes.UPDATE_FIELD, field, fieldId, formId
 });
 
 /* ====================

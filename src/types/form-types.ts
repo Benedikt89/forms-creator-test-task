@@ -1,12 +1,12 @@
 ///
 
 
-import moment, {Moment} from "moment";
+import {Moment} from "moment";
 
 export type FieldTypes = 'text' | 'textarea' | 'select' | 'radio' | 'checkbox' |
   'date' | 'time' | 'password' | 'range'
 
-export type RulesTypes = 'min' | 'max' | 'phone' | 'email' | 'number'
+export type RulesTypes = 'min' | 'max' | 'phone' | 'email' | 'number' | 'mandatory'
 
 export const withOptionsTypes: FieldTypes[] = ['radio', 'checkbox'];
 
@@ -24,12 +24,15 @@ export type RuleItem = {
 
 export type FieldItem = {
   id: string,
+  value: string
   inputType: FieldTypes,
   title: string,
   defaultValue: string,
   description: string,
   displayDescription: boolean,
   mandatory: boolean,
+  minRange: number,
+  maxRange: number,
   rules: RuleItem[],
   options: OptionType[]
 }
@@ -41,6 +44,7 @@ export type FormItemType = {
   lastUpdated: Moment,
   description: string,
   fieldsIds: string[],
+  confirmed: boolean,
   fields: {
     [key: string]: FieldItem
   }
