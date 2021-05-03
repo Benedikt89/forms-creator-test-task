@@ -1,0 +1,23 @@
+{
+  "files": {
+    "main.css": "/forms-creator-test-task/static/css/main.aab4d83d.chunk.css",
+    "main.js": "/forms-creator-test-task/static/js/main.5eec7add.chunk.js",
+    "main.js.map": "/forms-creator-test-task/static/js/main.5eec7add.chunk.js.map",
+    "runtime-main.js": "/forms-creator-test-task/static/js/runtime-main.96ceaa6d.js",
+    "runtime-main.js.map": "/forms-creator-test-task/static/js/runtime-main.96ceaa6d.js.map",
+    "static/js/2.ce50dcab.chunk.js": "/forms-creator-test-task/static/js/2.ce50dcab.chunk.js",
+    "static/js/2.ce50dcab.chunk.js.map": "/forms-creator-test-task/static/js/2.ce50dcab.chunk.js.map",
+    "static/js/3.75801500.chunk.js": "/forms-creator-test-task/static/js/3.75801500.chunk.js",
+    "static/js/3.75801500.chunk.js.map": "/forms-creator-test-task/static/js/3.75801500.chunk.js.map",
+    "index.html": "/forms-creator-test-task/index.html",
+    "static/css/main.aab4d83d.chunk.css.map": "/forms-creator-test-task/static/css/main.aab4d83d.chunk.css.map",
+    "static/js/2.ce50dcab.chunk.js.LICENSE.txt": "/forms-creator-test-task/static/js/2.ce50dcab.chunk.js.LICENSE.txt",
+    "static/media/background-indexed.c45094ac.png": "/forms-creator-test-task/static/media/background-indexed.c45094ac.png"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.96ceaa6d.js",
+    "static/js/2.ce50dcab.chunk.js",
+    "static/css/main.aab4d83d.chunk.css",
+    "static/js/main.5eec7add.chunk.js"
+  ]
+}
